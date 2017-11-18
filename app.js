@@ -7,26 +7,32 @@
 	MenuSearchService.$inject = ['$http'];
 	function MenuSearchService($http){
 		this.getMatchedMenuItems = function(searchTerm){
-			return $http.get("https://davids-restaurant.herokuapp.com/menu_items.json")
-			.then(function (response) 	
-			{
+			var promise = $http.get("https://davids-restaurant.herokuapp.com/menu_items.json")
+			.then(function (response){
 				var searchResult = 0;
-				var j = 0;
+				var returnItemsArray = [];
 				var menu = response.data.menu_items;
-				var foundItems = _.filter (menu, function(item) {
-					return item.description.includes(searchTerm);
+				_.each(menu, function(item) {
+					if(item.description.includes(searchTerm))
+					{
+						returnItemsArray.push(item.name);
+					}
 				});
-				return foundItems;
+				return returnItemsArray;
 			});
+			return promise;
 		}
 	}
-
 	NarrowItDownController.$inject = ['$scope','MenuSearchService'];
 	function NarrowItDownController($scope,MenuSearchService){
 		$scope.narrowItDownMethod = function() {
 		var termToSearch = $scope.searchTerm;
-		$scope.foundItems = MenuSearchService.getMatchedMenuItems(termToSearch);
+	  MenuSearchService.getMatchedMenuItems(termToSearch)
+		 .then(function (response){
+			$scope.foundItems = response;
+		});
+		//$scope.foundItems = MenuSearchService.getMatchedMenuItems(termToSearch);
 		};
 	};
-	
+``
 })();
